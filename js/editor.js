@@ -15,6 +15,8 @@ class Editor extends GuaObject {
     init() {
         this.startX = this.fontSize + 10
         this.lineHeight = this.fontSize + 6
+        this.paddingDown = (this.lineHeight - this.fontSize) / 2
+
         // 按行生成数据
         let line = []
         for (let item of this.tokenList) {
@@ -27,8 +29,21 @@ class Editor extends GuaObject {
         }
         line.push(Token.new('\n', Token.lineBreak))
         this.lines.push(line)
+
+        // 生成光标，默认在第一个字符开始
+        this.cursor = Cursor.new(this)
+        let width = this.context.measureText('a').width
+        this.updateCursor(this.startX - width, this.lineHeight - this.paddingDown)
+
         this.__start()
     }
+
+    updateCursor(x, y) {
+        let c = this.cursor
+        c.x = x
+        c.y = y
+    }
+
 
     __start() {
         var g = this
@@ -43,12 +58,15 @@ class Editor extends GuaObject {
 
         // update x
         g.update()
+        this.cursor.update()
 
         // clear
         g.context.clearRect(0, 0, g.canvas.width, g.canvas.height)
 
         // draw
         g.draw()
+        this.cursor.draw()
+
 
         // next run loop
         setTimeout(function() {
@@ -59,23 +77,21 @@ class Editor extends GuaObject {
     drawLine(index) {
         let ctx = this.context
         let i = index + 1
-        let paddingDown = (this.lineHeight - this.fontSize) / 2
         // 画框框
         // ctx.fillStyle = '#999'
         // ctx.fillRect(0,0, this.startX, this.lineHeight)
         // 画行数
         ctx.fillStyle = '#555'
-        ctx.fillText(i, this.startX - this.fontSize, this.lineHeight * i - paddingDown)
+        ctx.fillText(i, this.startX - this.fontSize, this.lineHeight * i - this.paddingDown)
     }
 
     draw() {
         let ctx = this.context
         ctx.font = `${this.fontSize}px ${this.font}`
-        let paddingDown = (this.lineHeight - this.fontSize) / 2
         for (let i = 0; i < this.lines.length; i++) {
             let line = this.lines[i]
             this.drawLine(i)
-            let offsetY = (i + 1) * this.lineHeight - paddingDown
+            let offsetY = (i + 1) * this.lineHeight - this.paddingDown
             let offsetX = this.startX
             for (const token of line) {
                 let value = token.value
