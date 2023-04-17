@@ -8,9 +8,6 @@
             color: #888;
             border: 1px solid #888888;
             border-radius: 4px;
-            padding: 20px;
-            width: 600px;
-            min-height: 100px;
         }
 
         .editor:focus {
@@ -19,7 +16,7 @@
     </style>
 </head>
 <body>
-    <canvas class="editor" contenteditable="true" data-action="inputValue"></canvas>
+    <canvas id="id-canvas" width="400" height="400" class="editor" contenteditable="true" data-action="inputValue"></canvas>
     <script src="js/utils.js"></script>
     <script src="js/enums.js"></script>
     <script src="js/string_list.js"></script>

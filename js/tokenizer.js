@@ -43,7 +43,7 @@ const isAuto = function(c) {
 
 
 const isNumber = function(s) {
-    let c = '.'
+    // let c = '.'
     for (let e of s) {
         if (!isDigit(e)) {
             return false
@@ -85,12 +85,12 @@ const readString = function(stringList, type) {
     while (sl.hasChar()) {
         let c = sl.readChar()
         if (c === type) {
-            return s
+            return type + s + type
         }
         s += c
     }
 
-    return s
+    return type + s + type
 }
 
 // 读取数值
@@ -135,11 +135,10 @@ const readVar = function(sl) {
 const tokens = function(code) {
     let ts = []
     let sl = StringList.new(code)
-    console.log('sl', sl)
+
     while(sl.hasChar()) {
         let e = sl.readChar()
         let p = sl.peekChar()
-        log(sl, e, p)
 
         if (e === '/' && p === '/') {
             let s = e
@@ -150,15 +149,18 @@ const tokens = function(code) {
             }
             let t = Token.new(s, TokenType.comment)
             ts.push(t)
-        } else if (isNumber(e)) {
-            let n = readNumber(sl)
-            let t = Token.new(n, TokenType.number)
+        } else if (isAuto(e)) {
+            let t = Token.new(e, TokenType.auto)
             ts.push(t)
         } else if (e === `"` || e === `'` || e === '`') {
             let s = readString(sl, e)
             let t = Token.new(s, TokenType.string)
             ts.push(t)
-        }  else if (e === ' ') {
+        } else if (isNumber(e)) {
+            let n = readNumber(sl)
+            let t = Token.new(n, TokenType.number)
+            ts.push(t)
+        } else if (e === ' ') {
             let t = Token.new(e, TokenType.whiteSpace)
             ts.push(t)
         } else if (e === '\n') {
