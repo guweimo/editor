@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Editor</title>
+    <style>
+        .editor {
+            color: #888;
+            border: 1px solid #888888;
+            border-radius: 4px;
+            padding: 20px;
+            width: 600px;
+            min-height: 100px;
+        }
+
+        .editor:focus {
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <canvas class="editor" contenteditable="true" data-action="inputValue"></canvas>
+    <script src="js/utils.js"></script>
+    <script src="js/string_list.js"></script>
+    <script src="js/tokenizer.js"></script>
+    <script src="js/token.js"></script>
+    <script src="js/action.js"></script>
+    <script src="js/editor.js"></script>
+</body>
+</html>
