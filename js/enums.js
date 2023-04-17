@@ -13,7 +13,7 @@ const TokenType = {
 
 const Palette = {
     keyword: '#0033B3',
-    '空格': '#7991BE',
+    '空格': '#CCCCCC',
     'auto': '#000',
     '数字': '数字',
     '字符串': '#067D17',

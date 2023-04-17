@@ -1,5 +1,3 @@
-let fontSize = 18
-let font = 'Menlo'
 class Editor extends GuaObject {
 
     constructor(code) {
@@ -8,11 +6,15 @@ class Editor extends GuaObject {
         this.tokenList = tokens(this.code)
         this.canvas = document.querySelector('#id-canvas')
         this.context = this.canvas.getContext('2d')
+        this.fontSize = 18
+        this.font = 'Consolas'
         this.lines = []
         this.init()
     }
 
     init() {
+        this.startX = this.fontSize + 10
+        this.lineHeight = this.fontSize + 5
         // 按行生成数据
         let line = []
         for (let item of this.tokenList) {
@@ -54,20 +56,26 @@ class Editor extends GuaObject {
         }, 1000 / 60)
     }
 
+    drawLine(index) {
+        let ctx = this.context
+        let i = index + 1
+        ctx.fillStyle = '#ccc'
+        ctx.fillText(i, this.startX - this.fontSize, this.lineHeight * i)
+    }
+
     draw() {
         log('into')
         let ctx = this.context
-        ctx.font = `${fontSize}px ${font}`
-        let startX = fontSize + 10
-        let offsetX = startX
-        let lineHeight = fontSize + 5
-        let offsetY = lineHeight
-        log('this.lines', this.lines)
-        for (const line of this.lines) {
+        ctx.font = `${this.fontSize}px ${this.font}`
+        let offsetX = this.startX
+        let offsetY = this.lineHeight
+        for (let i = 0; i < this.lines.length; i++) {
+            let line = this.lines[i]
+            this.drawLine(i)
             for (const token of line) {
                 let value = token.value
                 if (value === ' ') {
-                    value = ' · '
+                    value = '•'
                 }
                 let type = token.type
                 ctx.fillStyle = Palette[type]
@@ -75,8 +83,8 @@ class Editor extends GuaObject {
                 let w = ctx.measureText(value).width
                 offsetX += w
             }
-            offsetX = startX
-            offsetY += lineHeight
+            offsetX = this.startX
+            offsetY += this.lineHeight
         }
     }
 
@@ -89,8 +97,8 @@ class Editor extends GuaObject {
 
 const __main = function() {
     let code = `const a = 1
-const b = 'test'`
-    let e = Editor.new(code)
+    const b = "test"`
+    Editor.new(code)
 }
 
 __main()
