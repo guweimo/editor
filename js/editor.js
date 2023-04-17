@@ -14,7 +14,7 @@ class Editor extends GuaObject {
 
     init() {
         this.startX = this.fontSize + 10
-        this.lineHeight = this.fontSize + 5
+        this.lineHeight = this.fontSize + 6
         // 按行生成数据
         let line = []
         for (let item of this.tokenList) {
@@ -59,19 +59,24 @@ class Editor extends GuaObject {
     drawLine(index) {
         let ctx = this.context
         let i = index + 1
-        ctx.fillStyle = '#ccc'
-        ctx.fillText(i, this.startX - this.fontSize, this.lineHeight * i)
+        let paddingDown = (this.lineHeight - this.fontSize) / 2
+        // 画框框
+        // ctx.fillStyle = '#999'
+        // ctx.fillRect(0,0, this.startX, this.lineHeight)
+        // 画行数
+        ctx.fillStyle = '#555'
+        ctx.fillText(i, this.startX - this.fontSize, this.lineHeight * i - paddingDown)
     }
 
     draw() {
-        log('into')
         let ctx = this.context
         ctx.font = `${this.fontSize}px ${this.font}`
-        let offsetX = this.startX
-        let offsetY = this.lineHeight
+        let paddingDown = (this.lineHeight - this.fontSize) / 2
         for (let i = 0; i < this.lines.length; i++) {
             let line = this.lines[i]
             this.drawLine(i)
+            let offsetY = (i + 1) * this.lineHeight - paddingDown
+            let offsetX = this.startX
             for (const token of line) {
                 let value = token.value
                 if (value === ' ') {
@@ -83,8 +88,6 @@ class Editor extends GuaObject {
                 let w = ctx.measureText(value).width
                 offsetX += w
             }
-            offsetX = this.startX
-            offsetY += this.lineHeight
         }
     }
 
@@ -97,7 +100,8 @@ class Editor extends GuaObject {
 
 const __main = function() {
     let code = `const a = 1
-    const b = "test"`
+const b = 1
+const c = [2, 3, '3',]`
     Editor.new(code)
 }
 

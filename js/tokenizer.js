@@ -70,11 +70,6 @@ const isUpper = function(c) {
 }
 
 const isString = function(s) {
-    for (let e of s) {
-        if (!isLetter(e) && !isUpper(e)) {
-            return false
-        }
-    }
     return true
 }
 
@@ -107,6 +102,7 @@ const readNumber = function(stringList) {
         }
         n += c
     }
+    return Number(n)
 }
 
 // 读取字符，
