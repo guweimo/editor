@@ -30,38 +30,20 @@ const isKeyword = function(s) {
     return false
 }
 
-const isVar = function(type) {
-    let varTypes = [
-        'var',
-        'let',
-        'const'
-    ]
-
-    for (let item of varTypes) {
-        if (e === type) {
-            return true
-        }
-    }
-
-    return false
-}
-
-
 // 是否是数值
 const isDigit = function(c) {
     const digits = '0123456789'
-    return digits.find(c) > -1
+    return digits.indexOf(c) > -1
 }
-
 
 const isAuto = function(c) {
     var auto = '[]{},:+-*/=<>!().;%'
-    return auto.find(c) > -1
+    return auto.indexOf(c) > -1
 }
 
 
 const isNumber = function(s) {
-    var c = '.'
+    let c = '.'
     for (let e of s) {
         if (!isDigit(e)) {
             return false
@@ -73,7 +55,27 @@ const isNumber = function(s) {
 
 const isSpace = function(c) {
     const space = ' \n\t'
-    return space.find(c) > -1
+    return space.indexOf(c) > -1
+}
+
+// 是否是小写字母
+const isLetter = function(c) {
+    const letters = 'abcdefghijklmnopqrstuvwxyz'
+    return letters.indexOf(c) > -1
+}
+
+const isUpper = function(c) {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    return letters.indexOf(c) > -1
+}
+
+const isString = function(s) {
+    for (let e of s) {
+        if (!isLetter(e) && !isUpper(e)) {
+            return false
+        }
+    }
+    return true
 }
 
 // 读取字符串，根据 type 截取当前不同的字符串
@@ -96,7 +98,7 @@ const readNumber = function(stringList) {
     let sl = stringList
     sl.subIndex()
     let n = ''
-    while (true) {
+    while (sl.hasChar()) {
         let c = sl.readChar()
         if (!isDigit(c)) {
             // index 减一
@@ -111,8 +113,7 @@ const readNumber = function(stringList) {
 const readVar = function(sl) {
     sl.subIndex()
     let s = ''
-    let elseif = ''
-    while(true) {
+    while(sl.hasChar()) {
         let c = sl.readChar()
         let c2 = sl.peekCharTwo()
         if (c === ' ' && c2 === 'if') {
@@ -134,9 +135,11 @@ const readVar = function(sl) {
 const tokens = function(code) {
     let ts = []
     let sl = StringList.new(code)
+    console.log('sl', sl)
     while(sl.hasChar()) {
         let e = sl.readChar()
         let p = sl.peekChar()
+        log(sl, e, p)
 
         if (e === '/' && p === '/') {
             let s = e
@@ -146,29 +149,30 @@ const tokens = function(code) {
                 s += c
             }
             let t = Token.new(s, TokenType.comment)
+            ts.push(t)
         } else if (isNumber(e)) {
             let n = readNumber(sl)
             let t = Token.new(n, TokenType.number)
-            ts.add(t)
+            ts.push(t)
         } else if (e === `"` || e === `'` || e === '`') {
-            let e = readString(sl, e)
-            let t = Token.new(e, TokenType.string)
-            ts.add(t)
+            let s = readString(sl, e)
+            let t = Token.new(s, TokenType.string)
+            ts.push(t)
         }  else if (e === ' ') {
             let t = Token.new(e, TokenType.whiteSpace)
-            ts.add(t)
+            ts.push(t)
         } else if (e === '\n') {
             let t = Token.new(e, TokenType.lineBreak)
-            ts.add(t)
-        } else {
+            ts.push(t)
+        } else if (isString(e)) {
             let s = readVar(sl)
             // 关键字符
             if (isKeyword(s)) {
                 let t = Token.new(s, TokenType.keyword)
-                ts.add(t)
+                ts.push(t)
             } else {
                 let t = Token.new(s, TokenType.normal)
-                ts.add(t)
+                ts.push(t)
             }
         }
     }
