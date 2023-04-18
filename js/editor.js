@@ -8,13 +8,15 @@ class Editor extends GuaObject {
         this.context = this.canvas.getContext('2d')
         this.fontSize = 18
         this.font = 'Consolas'
-        this.lines = []
+        // 存放元素
+        this.elements = []
+        // 按行列存字符
+        this.codeObj = []
         this.init()
         this.setUpInputs()
     }
 
     init() {
-        this.codeObj = []
         this.startX = this.fontSize + 10
         this.lineHeight = this.fontSize + 6
         this.paddingDown = (this.lineHeight - this.fontSize) / 2
@@ -48,40 +50,16 @@ class Editor extends GuaObject {
 
         // // 生成光标，默认在第一个字符开始
         this.cursor = Cursor.new(this)
-        let width = this.context.measureText('a').width
-        this.updateCursor(this.startX - width, this.lineHeight - this.paddingDown)
+        this.addElement(this.cursor)
 
         this.__start()
     }
 
+    addElement(element) {
+        this.elements.push(element)
+    }
+
     setUpInputs() {
-        let canvas = this.canvas
-        // 绑定 click 事件
-        canvas.addEventListener('click', (event) => {
-            this.cursor.show = true
-            let row = Math.floor(event.offsetY / this.lineHeight)
-            let line = this.codeObj[row]
-            let x = 0
-            log('line', line)
-            if (line === undefined) {
-                line = this.codeObj[this.codeObj.length - 1]
-                x = line[line.length - 1].x
-            } else {
-                let offsetX = 100000
-                for (const token of line) {
-                    if (Math.abs(token.x - event.offsetX) < offsetX) {
-                        log('token', token, token.x, event.offsetX)
-                        x = token.x - token.w + 6
-                        offsetX = Math.abs(token.x - event.offsetX)
-                    }
-                }
-            }
-            this.cursor.x = x
-            this.cursor.y = line[0].y
-        })
-        canvas.addEventListener('blur', (event) => {
-            this.cursor.change()
-        })
     }
 
     updateCursor(x, y) {
@@ -110,7 +88,6 @@ class Editor extends GuaObject {
 
         // draw
         g.draw()
-        this.cursor.draw()
 
 
         // next run loop
@@ -146,6 +123,10 @@ class Editor extends GuaObject {
                 ctx.fillText(value, token.x, token.y)
             }
         }
+        // 画所有元素
+        for (const element of this.elements) {
+            element.draw()
+        }
     }
 
     update() {
@@ -160,6 +141,11 @@ class Editor extends GuaObject {
                 token.w = ctx.measureText(token.value).width
                 x += token.w
             }
+        }
+
+        // 更新所有元素
+        for (const element of this.elements) {
+            element.update()
         }
     }
 }
