@@ -8,22 +8,42 @@ class Cursor extends GuaObject {
         this.y = 0
         this.coolDown = 30
         this.count = 0
+        this.show = false
+
+        this.setUpInputs()
+    }
+
+    notFlashing() {
+        this.coolDown = 50
+        this.count = 0
+    }
+
+    setUpInputs() {
+        // let canvas = this.editor.canvas
+        // canvas.addEventListener('click', (event) => {
+        //
+        // })
+    }
+
+    change() {
+        this.show = !this.show
     }
 
     update() {
-
     }
 
     draw() {
-        this.coolDown--
-        if (this.coolDown === 0) {
-            this.count = (this.count + 1) % 2
-            this.coolDown = 30
-        }
-        if (this.count === 0) {
-            let ctx = this.editor.context
-            ctx.fillStyle = 'red'
-            ctx.fillText('|', this.x, this.y)
+        if (this.show) {
+            this.coolDown--
+            if (this.coolDown === 0) {
+                this.count = (this.count + 1) % 2
+                this.coolDown = 30
+            }
+            if (this.count === 0) {
+                let ctx = this.editor.context
+                ctx.fillStyle = 'red'
+                ctx.fillText('|', this.x, this.y)
+            }
         }
     }
 }

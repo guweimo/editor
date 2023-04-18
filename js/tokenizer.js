@@ -98,11 +98,11 @@ const readNumber = function(stringList) {
         if (!isDigit(c)) {
             // index 减一
             sl.subIndex()
-            return Number(n)
+            return n
         }
         n += c
     }
-    return Number(n)
+    return n
 }
 
 // 读取字符，
