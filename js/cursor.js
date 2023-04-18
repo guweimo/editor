@@ -20,39 +20,173 @@ class Cursor extends GuaObject {
 
     setUpInputs() {
         let canvas = this.editor.canvas
-        let editor = this.editor
         // 绑定 click 事件
         canvas.addEventListener('click', (event) => {
-            this.show()
-            let codeObj = editor.codeObj
-            // 拿到行数
-            let row = Math.floor(event.offsetY / editor.lineHeight)
-            // 根据行数拿到数据
-            let line = codeObj[row]
-            let x = 0
-            // 如果 line 为空，则拿到最后一行最后一个字符的位置
-            // 否则去根据 token x 和 offsetX 去相减，拿到绝对值的最小值
-            // 返回这个差的 token x
-            if (line === undefined) {
-                line = codeObj[codeObj.length - 1]
-                x = line[line.length - 1].x - (line[line.length - 1].w / 2)
-            } else {
-                let offsetX = 100000
-                for (const token of line) {
-                    let subX = Math.abs(token.x - event.offsetX)
-                    if (subX < offsetX) {
-                        x = token.x - (token.w / 2)
-                        offsetX = subX
-                    }
-                }
-            }
-            // 设置 光标 的位置
-            this.x = x
-            this.y = line[0].y
+            this.click()
         })
-        canvas.addEventListener('blur', (event) => {
+        canvas.addEventListener('blur', () => {
             this.stop()
         })
+
+        let moveKey = {
+            ArrowLeft: 'left',
+            ArrowRight: 'right',
+            ArrowUp: 'up',
+            ArrowDown: 'down',
+        }
+        canvas.addEventListener('keydown', (event) => {
+            log('event', event)
+            let key = event.key
+            if (Object.hasOwn(moveKey, key)) {
+                this.move(moveKey[key])
+            }
+        })
+    }
+
+    moveLeft() {
+        let col = this.col
+        let row = this.row
+        let codeObj = this.editor.codeObj
+        let line = codeObj[row]
+        col -= 1
+        // 小于零时，说明要去上一行
+        if (col < 0) {
+            row -= 1
+            line = codeObj[row]
+        }
+
+        // 看上一行是否有数据，没有数据就恢复原来的位置
+        // 有数据就拿到上一行的最后一列位置
+        if (line === undefined) {
+            col = this.col
+            row = this.row
+        } else if (col < 0) {
+            col = line.length - 1
+        }
+        this.row = row
+        this.col = col
+        let token = codeObj[row][col]
+        this.x = token.x - (token.w / 2)
+        this.y = token.y
+    }
+
+    moveRight() {
+        let col = this.col
+        let row = this.row
+        let codeObj = this.editor.codeObj
+        let line = codeObj[row]
+        col += 1
+        // 小于零时，说明要去上一行
+        let currentLength = line.length
+        if (col >= currentLength) {
+            row += 1
+            line = codeObj[row]
+            col = 0
+        }
+
+        // 看下一行是否有数据，没有数据就恢复原来的位置
+        // 有数据就拿到下一行的最后一列位置
+        if (line === undefined) {
+            col = this.col
+            row = this.row
+        }
+        this.row = row
+        this.col = col
+        let token = codeObj[row][col]
+        this.x = token.x - (token.w / 2)
+        this.y = token.y
+    }
+
+    moveUp() {
+        let col = this.col
+        let row = this.row
+        let codeObj = this.editor.codeObj
+        row -= 1
+        let line = codeObj[row]
+        // 看上一行是否有数据，没有数据就恢复原来的位置
+        // 否则看上一行的列是否存在，不存在就拿到上一行最后一列的位置
+        if (line === undefined) {
+            col = this.col
+            row = this.row
+        } else if (line[col] === undefined) {
+            col = line.length - 1
+        }
+
+        this.row = row
+        this.col = col
+        let token = codeObj[row][col]
+        this.x = token.x - (token.w / 2)
+        this.y = token.y
+    }
+
+    moveDown() {
+        let col = this.col
+        let row = this.row
+        let codeObj = this.editor.codeObj
+        row += 1
+        let line = codeObj[row]
+        // 看上一行是否有数据，没有数据就恢复原来的位置
+        // 否则看上一行的列是否存在，不存在就拿到上一行最后一列的位置
+        if (line === undefined) {
+            col = this.col
+            row = this.row
+        } else if (line[col] === undefined) {
+            col = line.length - 1
+        }
+
+        this.row = row
+        this.col = col
+        let token = codeObj[row][col]
+        this.x = token.x - (token.w / 2)
+        this.y = token.y
+    }
+
+    move(direction) {
+        if (direction === 'left') {
+            this.moveLeft()
+        } else if (direction === 'right') {
+            this.moveRight()
+        } else if (direction === 'up') {
+            this.moveUp()
+        } else if (direction === 'down') {
+            this.moveDown()
+        }
+
+        this.count = 0
+        this.coolDown = 50
+    }
+
+    click() {
+        this.show()
+
+        let editor = this.editor
+        let codeObj = editor.codeObj
+        // 拿到行数
+        let row = Math.floor(event.offsetY / editor.lineHeight)
+        // 根据行数拿到数据
+        let line = codeObj[row]
+        let token = null
+        // 如果 line 为空，则拿到最后一行最后一个字符的位置
+        // 否则去根据 token x 和 offsetX 去相减，拿到绝对值的最小值
+        // 返回这个差的 token x
+        if (line === undefined) {
+            line = codeObj[codeObj.length - 1]
+            token = line[line.length - 1]
+        } else {
+            let offsetX = 100000
+            for (const t of line) {
+                let subX = Math.abs(t.x - event.offsetX)
+                if (subX < offsetX) {
+                    token = t
+                    offsetX = subX
+                }
+            }
+        }
+        // 设置 光标 的位置
+        this.col = token.col
+        this.row = token.row
+        this.x = token.x -(token.w / 2)
+        this.y = token.y
     }
 
     show() {

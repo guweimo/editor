@@ -21,6 +21,18 @@ class Editor extends GuaObject {
         this.lineHeight = this.fontSize + 6
         this.paddingDown = (this.lineHeight - this.fontSize) / 2
 
+        // 把 token list 转成 row col 形式存储字符
+        this.codeObjFromTokenList()
+
+        // // 生成光标，默认在第一个字符开始
+        this.cursor = Cursor.new(this)
+        this.addElement(this.cursor)
+
+        this.__start()
+    }
+
+    codeObjFromTokenList() {
+        this.codeObj = []
         let line = []
         let row = 0
         let col = 0
@@ -47,12 +59,6 @@ class Editor extends GuaObject {
             line.push(EditorText.new(this, '\n', Token.lineBreak, row, col+1))
             this.codeObj.push(line)
         }
-
-        // // 生成光标，默认在第一个字符开始
-        this.cursor = Cursor.new(this)
-        this.addElement(this.cursor)
-
-        this.__start()
     }
 
     addElement(element) {
@@ -60,6 +66,7 @@ class Editor extends GuaObject {
     }
 
     setUpInputs() {
+        let canvas = this.canvas
     }
 
     updateCursor(x, y) {
