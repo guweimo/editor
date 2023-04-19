@@ -24,7 +24,11 @@ class Editor extends GuaObject {
         // 把 token list 转成 row col 形式存储字符
         this.codeObjFromTokenList()
 
-        // // 生成光标，默认在第一个字符开始
+        // 生成 code 绘画
+        this.code = Code.new(this)
+        this.addElement(this.code)
+
+        // 生成光标，默认在第一个字符开始
         this.cursor = Cursor.new(this)
         this.addElement(this.cursor)
 
@@ -70,12 +74,12 @@ class Editor extends GuaObject {
         let string = '1234567890' +
             'abcdefghijklmnopqrstuvwxyz' +
             'ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
-            '~!@#$%^&*()_+=-`[]\\;\',./<>?:"{}|'
+            '~!@#$%^&*()_+=-`[]\\;\',./<>?:"{}| '
         canvas.addEventListener('keydown', (event) => {
             log('event', event)
+            let row = this.cursor.row
+            let col = this.cursor.col
             if (string.includes(event.key)) {
-                let row = this.cursor.row
-                let col = this.cursor.col
                 // 拿到行
                 let line = this.codeObj[row]
                 // 插入 col 这个位置
@@ -85,14 +89,29 @@ class Editor extends GuaObject {
                 this.cursor.col += 1
                 this.cursor.resident()
             } else if (event.key === 'Backspace') {
-                let row = this.cursor.row
-                let col = this.cursor.col
                 // 拿到行
                 let line = this.codeObj[row]
-                // 插入 col 这个位置
-                line.splice(col - 1, 1)
-                log('line', line)
-                this.cursor.col -= 1
+                if (col === 0) {
+                    let preLine = this.codeObj[row - 1]
+                    if (preLine !== undefined) {
+                        // 移除最后一个回车
+                        preLine.pop()
+                        // 计算光标的位置
+                        this.cursor.row = row - 1
+                        this.cursor.col = preLine.length
+                    }
+                    // this.codeObj.splice(row, 0, line)
+                } else {
+                    line.splice(col - 1, 1)
+                    // 插入 col 这个位置
+                    this.cursor.col -= 1
+                }
+            } else if (event.key === 'Enter') {
+                let t = EditorText.new(this, '\n', '', 0, 0)
+                this.codeObj[row].splice(col, 0, t)
+                // this.codeObj.splice(row+1, 0, line)
+                this.cursor.col = 0
+                this.cursor.row += 1
             }
         })
     }
@@ -143,21 +162,6 @@ class Editor extends GuaObject {
     }
 
     draw() {
-        let ctx = this.context
-        ctx.font = `${this.fontSize}px ${this.font}`
-        for (let i = 0; i < this.codeObj.length; i++) {
-            let line = this.codeObj[i]
-            this.drawLine(i)
-            for (const token of line) {
-                let value = token.value
-                if (value === ' ') {
-                    value = '•'
-                }
-                let type = token.type
-                ctx.fillStyle = Palette[type]
-                ctx.fillText(value, token.x, token.y)
-            }
-        }
         // 画所有元素
         for (const element of this.elements) {
             element.draw()
@@ -165,8 +169,6 @@ class Editor extends GuaObject {
     }
 
     update() {
-        let ctx = this.context
-
         // 转成字符串
         let code = ''
         for (const line of this.codeObj) {
@@ -176,18 +178,6 @@ class Editor extends GuaObject {
         }
         this.tokenList = tokens(code)
         this.codeObjFromTokenList()
-
-        for (let index in this.codeObj) {
-            let line = this.codeObj[index]
-            let x = this.startX
-            let y = (Number(index) + 1) * this.lineHeight - this.paddingDown
-            for (const token of line) {
-                token.y = y
-                token.x = x
-                token.w = ctx.measureText(token.value).width
-                x += token.w
-            }
-        }
 
         // 更新所有元素
         for (const element of this.elements) {

@@ -82,6 +82,7 @@ const readString = function(stringList, type) {
         if (c === type) {
             return s + type
         } else if (isSpace(c)) {
+            sl.subIndex()
             return s
         }
         s += c

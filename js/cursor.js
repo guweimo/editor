@@ -21,7 +21,7 @@ class Cursor extends GuaObject {
     setUpInputs() {
         let canvas = this.editor.canvas
         // 绑定 click 事件
-        canvas.addEventListener('click', (event) => {
+        canvas.addEventListener('click', () => {
             this.click()
         })
         canvas.addEventListener('blur', () => {
@@ -196,8 +196,7 @@ class Cursor extends GuaObject {
         // 设置 光标 的位置
         this.col = token.col
         this.row = token.row
-        this.x = token.x -(token.w / 2)
-        this.y = token.y
+        this.resident()
     }
 
     show() {
