@@ -5,6 +5,7 @@ class Editor extends GuaObject {
         this.code = code
         this.tokenList = tokens(this.code)
         this.canvas = document.querySelector('#id-canvas')
+        this.textarea = document.querySelector('#id-textarea')
         this.context = this.canvas.getContext('2d')
         this.fontSize = 18
         this.font = 'Consolas'
@@ -71,12 +72,13 @@ class Editor extends GuaObject {
 
     setUpInputs() {
         let canvas = this.canvas
+        let textarea = this.textarea
         let string = '1234567890' +
             'abcdefghijklmnopqrstuvwxyz' +
             'ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
             '~!@#$%^&*()_+=-`[]\\;\',./<>?:"{}| '
-        canvas.addEventListener('keydown', (event) => {
-            log('event', event)
+        textarea.addEventListener('keydown', (event) => {
+            event.preventDefault()
             let row = this.cursor.row
             let col = this.cursor.col
             if (string.includes(event.key)) {
@@ -113,6 +115,27 @@ class Editor extends GuaObject {
                 this.cursor.col = 0
                 this.cursor.row += 1
             }
+        })
+
+        textarea.addEventListener('compositionstart', (event) => {
+        })
+        textarea.addEventListener('compositionend', (event) => {
+            textarea.value = ''
+            log('event', event)
+            let row = this.cursor.row
+            let col = this.cursor.col
+            // 拿到行
+            let line = this.codeObj[row]
+
+            for (const c of event.data) {
+                // 插入 col 这个位置
+                let t = EditorText.new(this, c, '', row, col)
+                line.splice(col, 0, t)
+                col += 1
+            }
+            this.cursor.col = col
+            this.cursor.resident()
+
         })
     }
 

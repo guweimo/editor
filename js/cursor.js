@@ -19,7 +19,9 @@ class Cursor extends GuaObject {
     }
 
     setUpInputs() {
-        let canvas = this.editor.canvas
+        let editor = this.editor
+        let canvas = editor.canvas
+        let textarea = editor.textarea
         // 绑定 click 事件
         canvas.addEventListener('click', () => {
             this.click()
@@ -36,7 +38,7 @@ class Cursor extends GuaObject {
             Home: 'home',
             End: 'end',
         }
-        canvas.addEventListener('keydown', (event) => {
+        textarea.addEventListener('keydown', (event) => {
             let key = event.key
             if (Object.hasOwn(moveKey, key)) {
                 this.move(moveKey[key])
@@ -214,6 +216,11 @@ class Cursor extends GuaObject {
         let token = codeObj[row][col]
         this.x = token.x - (token.w / 2)
         this.y = token.y
+
+        let textarea = this.editor.textarea
+        textarea.style.left = this.x + 'px'
+        textarea.style.top = this.y + 'px'
+        textarea.focus()
     }
 
     draw() {

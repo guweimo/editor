@@ -6,8 +6,16 @@
     <style>
         .editor {
             color: #888;
+            position: relative;
             border: 1px solid #888888;
             border-radius: 4px;
+            z-index: 999;
+        }
+
+        #id-textarea  {
+            z-index: 3;
+            position: absolute;
+            opacity: 0;
         }
 
         .editor:focus {
@@ -16,6 +24,7 @@
     </style>
 </head>
 <body>
+    <textarea id="id-textarea"></textarea>
     <canvas id="id-canvas" width="400" height="400" class="editor" contenteditable="true" data-action="inputValue"></canvas>
     <script src="js/utils.js"></script>
     <script src="js/enums.js"></script>
