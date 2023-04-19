@@ -33,9 +33,10 @@ class Cursor extends GuaObject {
             ArrowRight: 'right',
             ArrowUp: 'up',
             ArrowDown: 'down',
+            Home: 'home',
+            End: 'end',
         }
         canvas.addEventListener('keydown', (event) => {
-            log('event', event)
             let key = event.key
             if (Object.hasOwn(moveKey, key)) {
                 this.move(moveKey[key])
@@ -65,9 +66,6 @@ class Cursor extends GuaObject {
         }
         this.row = row
         this.col = col
-        let token = codeObj[row][col]
-        this.x = token.x - (token.w / 2)
-        this.y = token.y
     }
 
     moveRight() {
@@ -92,9 +90,6 @@ class Cursor extends GuaObject {
         }
         this.row = row
         this.col = col
-        let token = codeObj[row][col]
-        this.x = token.x - (token.w / 2)
-        this.y = token.y
     }
 
     moveUp() {
@@ -114,9 +109,6 @@ class Cursor extends GuaObject {
 
         this.row = row
         this.col = col
-        let token = codeObj[row][col]
-        this.x = token.x - (token.w / 2)
-        this.y = token.y
     }
 
     moveDown() {
@@ -136,9 +128,22 @@ class Cursor extends GuaObject {
 
         this.row = row
         this.col = col
-        let token = codeObj[row][col]
-        this.x = token.x - (token.w / 2)
-        this.y = token.y
+    }
+
+    moveLine(direction) {
+        let col = this.col
+        let row = this.row
+        let codeObj = this.editor.codeObj
+        let line = codeObj[row]
+
+        if (direction === 'home') {
+            col = 0
+        } else if (direction === 'end') {
+            col = line.length - 1
+        }
+
+        this.row = row
+        this.col = col
     }
 
     move(direction) {
@@ -150,8 +155,14 @@ class Cursor extends GuaObject {
             this.moveUp()
         } else if (direction === 'down') {
             this.moveDown()
+        } else if (direction === 'home' || direction === 'end') {
+            this.moveLine(direction)
         }
 
+       this.resident()
+    }
+
+    resident() {
         this.count = 0
         this.coolDown = 50
     }
@@ -198,6 +209,12 @@ class Cursor extends GuaObject {
     }
 
     update() {
+        let col = this.col
+        let row = this.row
+        let codeObj = this.editor.codeObj
+        let token = codeObj[row][col]
+        this.x = token.x - (token.w / 2)
+        this.y = token.y
     }
 
     draw() {

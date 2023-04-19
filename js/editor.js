@@ -67,6 +67,34 @@ class Editor extends GuaObject {
 
     setUpInputs() {
         let canvas = this.canvas
+        let string = '1234567890' +
+            'abcdefghijklmnopqrstuvwxyz' +
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
+            '~!@#$%^&*()_+=-`[]\\;\',./<>?:"{}|'
+        canvas.addEventListener('keydown', (event) => {
+            log('event', event)
+            if (string.includes(event.key)) {
+                let row = this.cursor.row
+                let col = this.cursor.col
+                // 拿到行
+                let line = this.codeObj[row]
+                // 插入 col 这个位置
+                let t = EditorText.new(this, event.key, '', row, col)
+                line.splice(col, 0, t)
+
+                this.cursor.col += 1
+                this.cursor.resident()
+            } else if (event.key === 'Backspace') {
+                let row = this.cursor.row
+                let col = this.cursor.col
+                // 拿到行
+                let line = this.codeObj[row]
+                // 插入 col 这个位置
+                line.splice(col - 1, 1)
+                log('line', line)
+                this.cursor.col -= 1
+            }
+        })
     }
 
     updateCursor(x, y) {
@@ -138,6 +166,17 @@ class Editor extends GuaObject {
 
     update() {
         let ctx = this.context
+
+        // 转成字符串
+        let code = ''
+        for (const line of this.codeObj) {
+            for (const token of line) {
+                code += token.value
+            }
+        }
+        this.tokenList = tokens(code)
+        this.codeObjFromTokenList()
+
         for (let index in this.codeObj) {
             let line = this.codeObj[index]
             let x = this.startX

@@ -76,16 +76,18 @@ const isString = function(s) {
 // 读取字符串，根据 type 截取当前不同的字符串
 const readString = function(stringList, type) {
     let sl = stringList
-    let s = ''
+    let s = type
     while (sl.hasChar()) {
         let c = sl.readChar()
         if (c === type) {
-            return type + s + type
+            return s + type
+        } else if (isSpace(c)) {
+            return s
         }
         s += c
     }
 
-    return type + s + type
+    return s
 }
 
 // 读取数值
