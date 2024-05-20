@@ -30,7 +30,7 @@ class Code extends GuaObject {
         let i = index + 1
         // 画框框
         // ctx.fillStyle = '#999'
-        // ctx.fillRect(0,0, this.startX, this.lineHeight)
+        // ctx.fillRect(0,0, editor.startX, editor.lineHeight)
         // 画行数
         ctx.fillStyle = '#555'
         ctx.fillText(i, editor.startX - editor.fontSize, editor.lineHeight * i - editor.paddingDown)

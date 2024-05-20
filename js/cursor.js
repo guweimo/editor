@@ -9,6 +9,8 @@ class Cursor extends GuaObject {
         this.coolDown = 30
         this.count = 0
         this.alive = false
+        this.select = false
+        this.selectList = []
 
         this.setUpInputs()
     }
@@ -22,12 +24,84 @@ class Cursor extends GuaObject {
         let editor = this.editor
         let canvas = editor.canvas
         let textarea = editor.textarea
+        let isMouse = false
         // 绑定 click 事件
         canvas.addEventListener('click', () => {
-            this.click()
+            log('click', isMouse)
+            if (!isMouse) {
+                this.click()
+            }
         })
-        canvas.addEventListener('blur', () => {
-            this.stop()
+        canvas.addEventListener('mousedown', () => {
+            isMouse = true
+            this.select = false
+            this.selectList = []
+
+            let editor = this.editor
+            let codeObj = editor.codeObj
+            // 拿到行数
+            let row = Math.floor(event.offsetY / editor.lineHeight)
+            // 根据行数拿到数据
+            let line = codeObj[row]
+            let token = null
+            // 如果 line 为空，则拿到最后一行最后一个字符的位置
+            // 否则去根据 token x 和 offsetX 去相减，拿到绝对值的最小值
+            // 返回这个差的 token x
+            if (line === undefined) {
+                line = codeObj[codeObj.length - 1]
+                token = line[line.length - 1]
+            } else {
+                let offsetX = 100000
+                for (const t of line) {
+                    let subX = Math.abs(t.x - event.offsetX)
+                    if (subX < offsetX) {
+                        token = t
+                        offsetX = subX
+                    }
+                }
+            }
+            // 设置 光标 的位置
+            this.col = token.col
+            this.row = token.row
+            this.selectList.push({col: this.col, row: this.row})
+        })
+        canvas.addEventListener('mousemove', () => {
+            if (isMouse) {
+                this.select = true
+                let editor = this.editor
+                let codeObj = editor.codeObj
+                // 拿到行数
+                let row = Math.floor(event.offsetY / editor.lineHeight)
+                // 根据行数拿到数据
+                let line = codeObj[row]
+                let token = null
+                // 如果 line 为空，则拿到最后一行最后一个字符的位置
+                // 否则去根据 token x 和 offsetX 去相减，拿到绝对值的最小值
+                // 返回这个差的 token x
+                if (line === undefined) {
+                    line = codeObj[codeObj.length - 1]
+                    token = line[line.length - 1]
+                } else {
+                    let offsetX = 100000
+                    for (const t of line) {
+                        let subX = Math.abs(t.x - event.offsetX)
+                        if (subX < offsetX) {
+                            token = t
+                            offsetX = subX
+                        }
+                    }
+                }
+                // 设置 光标 的位置
+                this.col = token.col
+                this.row = token.row
+                this.selectList[1] = {col: this.col, row: this.row}
+            }
+        })
+        canvas.addEventListener('mouseup', () => {
+            isMouse = false
+        })
+        textarea.addEventListener('blur', () => {
+            // isMouse = false
         })
 
         let moveKey = {
@@ -223,7 +297,23 @@ class Cursor extends GuaObject {
         textarea.focus()
     }
 
+    sort() {
+        let a = this.selectList[0]
+        let b = this.selectList[1]
+        if (a.row > b.row) {
+            return [b, a]
+        } else if (a.row === b.row && a.col > b.col) {
+            return [b, a]
+        } else if (a.row === b.row && a.col === b.col) {
+            return null
+        }
+
+        return [a, b]
+    }
+
     draw() {
+        let editor = this.editor
+        let ctx = editor.context
         if (this.alive) {
             this.coolDown--
             if (this.coolDown === 0) {
@@ -231,9 +321,36 @@ class Cursor extends GuaObject {
                 this.coolDown = 30
             }
             if (this.count === 0) {
-                let ctx = this.editor.context
                 ctx.fillStyle = 'red'
                 ctx.fillText('|', this.x, this.y)
+            }
+        }
+
+        if (this.selectList.length > 1) {
+            let codeObj = editor.codeObj
+            let selectList = this.sort()
+            if (selectList === null) {
+                return
+            }
+            log('selectList', selectList)
+            let a = selectList[0]
+            let b = selectList[1]
+            ctx.fillStyle = '#F8E88394'
+
+            let start = a.col
+            for (let row = a.row; row < b.row+1; row++) {
+                let line = codeObj[row]
+                let end = line.length
+                //
+                if (row === b.row)  {
+                    end = b.col
+                }
+                for (let col = start; col < end; col++) {
+                    let t = line[col]
+                    log('t', t)
+                    ctx.fillRect(t.x, t.y - editor.lineHeight + editor.paddingDown + 2, t.w, editor.lineHeight)
+                }
+                start = 0
             }
         }
     }

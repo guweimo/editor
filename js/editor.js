@@ -9,6 +9,7 @@ class Editor extends GuaObject {
         this.context = this.canvas.getContext('2d')
         this.fontSize = 18
         this.font = 'Consolas'
+        this.context.font = `${this.fontSize}px ${this.font}`
         // 存放元素
         this.elements = []
         // 按行列存字符
